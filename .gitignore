@@ -1,0 +1,6 @@
+/out/*
+/Lib
+/Scripts
+pyvenv.cfg
+/in/*
+/scraped/*
