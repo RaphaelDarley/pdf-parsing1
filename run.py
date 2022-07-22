@@ -1,6 +1,6 @@
 from timeit import default_timer as timer
 import scrape
-import parse
+import parse_db
 
 if __name__ == '__main__':
     start_time = timer()
@@ -18,8 +18,11 @@ if __name__ == '__main__':
 
     for link in links:
         pdfs = scrape.process_paper_page(link)
-        print(pdfs)
-        parse.process_doc(path=pdfs[0][0])
+        print(f"pdfs: {pdfs}")
+        (path, url) = pdfs[0]
+        print(path)
+        print(url)
+        parse_db.process_doc(path, url)
         break
 
     print(f"time elapsed: {timer() - start_time}")

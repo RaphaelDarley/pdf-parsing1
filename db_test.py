@@ -15,19 +15,19 @@ def main():
 
     content = "important item from python"
 
-    # add_test = ("INSERT INTO test"
-    #             "(content)"
-    #             "VALUES (%(content)s)")
-    add_test = ("INSERT INTO test "
-                "(content) "
-                f"VALUES ('{content}')")
+    add_test = ("INSERT INTO test"
+                "(content)"
+                "VALUES (%(content)s)")
+    # add_test = ("INSERT INTO test "
+    #             "(content) "
+    #             f"VALUES ('{content}')")
 
     # data_test = ('important item from python')
-    data_test = {'conent': 'important item from python'}
+    data_test = {'content': 'important item from python'}
 
-    # cursor.execute(add_test, data_test)
+    cursor.execute(add_test, data_test)
 
-    cursor.execute(add_test)
+    # cursor.execute(add_test)
 
     cnx.commit()
 

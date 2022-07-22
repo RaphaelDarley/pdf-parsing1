@@ -4,44 +4,49 @@ from pathlib import Path
 import fitz
 import db_utils
 
-# print(doc.metadata)
-
 source_dir = "data/papers"
 out_dir = "data/images"
 
 
-def process_doc(name="", path=""):
-    if path == "":
-        if name == "":
-            raise Exception("No file name or path given")
-        path = f"{source_dir}/{name}"
+def process_doc(path, url):
+    cnx = db_utils.init()
+    mkdirs(path)
+    print("parse_db: process_doc()")
 
-    process_pages(path, process_drawings)
-    process_pages(path, process_rasters)
+    # process_pages(path, process_drawings, cnx, url)
+    process_pages(path, process_rasters, cnx, url)
 
 
-def process_pages(path, fun):
+def process_pages(path, fun, cnx, url):
     doc = fitz.open(path)
-    doc_name = os.path.basename(doc.name)
-    Path(f"{out_dir}/{doc_name}/drawings/").mkdir(exist_ok=True, parents=True)
-    Path(f"{out_dir}/{doc_name}/rasters/").mkdir(exist_ok=True, parents=True)
-    for page in doc.pages():
+    for i, page in enumerate(doc.pages()):
         try:
-            fun(page)
+            fun(page, cnx, url, i)
         except Exception as e:
             print(f"Error {e} in {fun.__name__} on file: {path}")
 
 
-def process_rasters(page):
+def process_rasters(page, cnx, url, page_num):
     images = page.get_images()
     doc_name = os.path.basename(page.parent.name)
     base_path = f"{out_dir}/{doc_name}/rasters/{page.number}"
     for index, image in enumerate(images):
-        # print(page.get_image_rects(image[0]))
         page.set_cropbox(page.get_image_rects(
             image[0])[0].intersect(page.mediabox))
-        save_info(f"{base_path}-{index+1}",
-                  page.get_pixmap(matrix=fitz.Matrix(2, 2)), page.get_text())
+
+        image_info = {
+            "paper_url": url,
+            "paper_date": None,
+            "page_num": page_num,
+            "image_path": f"{base_path}-{index+1}.png",
+            "page_text": page.get_text(),
+            "img_text": None,
+        }
+
+        page.get_pixmap(matrix=fitz.Matrix(2, 2)).save(
+            image_info["image_path"])
+
+        db_utils.insert_image_info(cnx, **image_info)
 
 
 def process_drawings(page):
@@ -94,34 +99,8 @@ def process_drawings(page):
     save_info(base_path, img, page.get_text(), img_txt=img_txt)
 
 
-def save_info(base_path, img, page_txt, img_txt=False):
-    img.save(f"{base_path}.png")
-    if not img_txt == False:
-        with open(f"{base_path}.img.txt", "w", encoding="utf-8") as f:
-            f.write(img_txt)
-    with open(f"{base_path}.page.txt", "w", encoding="utf-8") as f:
-        f.write(page_txt)
-
-
-if __name__ == '__main__':
-    files = [f for f in os.listdir(source_dir) if isfile(f"{source_dir}\{f}")]
-
-    # name = "JHL-test1.pdf"
-    for num, name in enumerate(files):
-        process_doc(name)
-        print(f"finished {num +1}/{len(files)}: {name}")
-
-        doc = fitz.open(f"{source_dir}/{name}")
-        print(name)
-        print(doc.metadata)
-
-        break
-
-    # for page_num in range(1, 27, 1):
-    #     process_page(doc, page_num)
-
-
-# print(page.get_image_info())
-# print(page.get_svg_image())
-# print(page.get_text())
-# print(page.get_textbox())
+def mkdirs(doc_path):
+    doc = fitz.open(doc_path)
+    doc_name = os.path.basename(doc.name)
+    Path(f"{out_dir}/{doc_name}/drawings/").mkdir(exist_ok=True, parents=True)
+    Path(f"{out_dir}/{doc_name}/rasters/").mkdir(exist_ok=True, parents=True)
