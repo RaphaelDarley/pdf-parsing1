@@ -6,3 +6,5 @@
 pyvenv.cfg
 /in/*
 /scraped/*
+/data/*
+/__pycache__

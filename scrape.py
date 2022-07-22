@@ -27,17 +27,16 @@ def process_paper_page(url):
     except Exception as e:
         print(f"Error {e} for: {url}")
         return
+    out = []
     for pdf_url in pdf_urls:
         split_url = url.split("/")
         paper_name = split_url[-1] if not split_url[-1] == '' else split_url[-2]
         file_name = pdf_url.split("/")[-1].split(".")[0]
-        download_pdf(pdf_url, f"scraped/{paper_name}({file_name}).pdf")
+        file_path = f"data/papers/{paper_name}({file_name}).pdf"
+        out.append((file_path, pdf_url))
+        download_pdf(pdf_url, file_path)
+    return out
 
-
-# def get_pdf_url(url):
-#     page = requests.get(url)
-#     soup = BeautifulSoup(page.content, "html.parser")
-#     return soup.find('a', class_='wp-block-file__button').get('href')
 
 def get_href(anchor):
     return anchor.get('href')

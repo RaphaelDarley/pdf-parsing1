@@ -13,21 +13,23 @@ cnx = mysql.connector.connect(
 def main():
     cursor = cnx.cursor()
 
+    content = "important item from python"
+
     # add_test = ("INSERT INTO test"
     #             "(content)"
     #             "VALUES (%(content)s)")
     add_test = ("INSERT INTO test "
                 "(content) "
-                "VALUES (\"item from python\")")
+                f"VALUES ('{content}')")
 
     # data_test = ('important item from python')
     data_test = {'conent': 'important item from python'}
 
     # cursor.execute(add_test, data_test)
 
-    # cursor.execute(add_test, data_test)
+    cursor.execute(add_test)
 
-    # cnx.commit()
+    cnx.commit()
 
     cursor.close()
 
@@ -38,14 +40,9 @@ def main():
 
 def print_all_rows(cnx, table):
     cursor = cnx.cursor()
-    query = ("SELECT * FROM %s")
-
-    cursor.execute(query, (table, ))
-
+    query = (f"SELECT * FROM {table}")
+    cursor.execute(query)
     print(cursor.fetchall())
-
-    # for row in cursor:
-    #     print(row)
     cursor.close()
 
 

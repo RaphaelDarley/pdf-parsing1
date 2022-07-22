@@ -5,17 +5,22 @@ import fitz
 
 # print(doc.metadata)
 
-source_dir = "scraped"
-out_dir = "out"
+source_dir = "data/papers"
+out_dir = "data/images"
 
 
-def process_doc(name):
-    process_pages(name, process_drawings)
-    process_pages(name, process_rasters)
+def process_doc(name="", path=""):
+    if path == "":
+        if name == "":
+            raise Exception("No file name or path given")
+        path = f"{source_dir}/{name}"
+
+    process_pages(path, process_drawings)
+    process_pages(path, process_rasters)
 
 
-def process_pages(name, fun):
-    doc = fitz.open(f"{source_dir}/{name}")
+def process_pages(path, fun):
+    doc = fitz.open(path)
     doc_name = os.path.basename(doc.name)
     Path(f"{out_dir}/{doc_name}/drawings/").mkdir(exist_ok=True, parents=True)
     Path(f"{out_dir}/{doc_name}/rasters/").mkdir(exist_ok=True, parents=True)
@@ -23,7 +28,7 @@ def process_pages(name, fun):
         try:
             fun(page)
         except Exception as e:
-            print(f"Error {e} in {fun.__name__} on file: {name}")
+            print(f"Error {e} in {fun.__name__} on file: {path}")
 
 
 # def process_page(page):
