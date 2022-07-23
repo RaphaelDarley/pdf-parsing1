@@ -1,6 +1,9 @@
 from timeit import default_timer as timer
 import scrape
 import parse_db
+import faulthandler
+faulthandler.enable()
+
 
 if __name__ == '__main__':
     start_time = timer()
@@ -14,15 +17,20 @@ if __name__ == '__main__':
             break
         else:
             links.extend(urls)
-            break  # testing
+            # break  # testing
 
+    count = 0
+    # print(links)
     for link in links:
-        pdfs = scrape.process_paper_page(link)
-        print(f"pdfs: {pdfs}")
-        (path, url) = pdfs[0]
-        print(path)
-        print(url)
-        parse_db.process_doc(path, url)
-        break
+        if (pdfs := scrape.process_paper_page(link)) is None:
+            continue
+        # print(f"pdfs: {pdfs}")
+        for pdf in pdfs:
+            count += 1
+            if count < 65:  # seg fault on pdf 65
+                continue
+            (path, url) = pdf
+            parse_db.process_doc(path, url)
+            print(f"finished pdf no: {count} in {timer()-start_time}({path})")
 
     print(f"time elapsed: {timer() - start_time}")
