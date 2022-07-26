@@ -18,6 +18,8 @@ def process_doc(path, url):
     process_pages(path, process_drawings, cnx, url, paper_id)
     process_pages(path, process_rasters, cnx, url, paper_id)
 
+    cnx.close()
+
 
 def process_pages(path, fun, cnx, url, date):
     doc = fitz.open(path)
@@ -33,8 +35,13 @@ def process_rasters(page, cnx, url, page_num, paper_id):
     doc_name = os.path.basename(page.parent.name)
     base_path = f"{out_dir}/{doc_name}/rasters/{page_num}"
     for index, image in enumerate(images):
-        page.set_cropbox(page.get_image_rects(
-            image[0])[0].intersect(page.mediabox))
+        image_bound = page.get_image_rects(image)[0]
+
+        # print(image_bound.get_area())
+        if image_bound.get_area() < 1000:
+            continue
+
+        page.set_cropbox(image_bound.intersect(page.mediabox))
 
         image_info = {
             "paper_id": paper_id,

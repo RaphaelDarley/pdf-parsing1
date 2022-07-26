@@ -27,8 +27,11 @@ if __name__ == '__main__':
         # print(f"pdfs: {pdfs}")
         for pdf in pdfs:
             count += 1
-            if count < 65:  # seg fault on pdf 65
-                continue
+
+            # if count < 65:  # seg fault on pdf 65
+            #     continue
+            # if count < 185:
+            #     continue
             (path, url) = pdf
             parse_db.process_doc(path, url)
             print(f"finished pdf no: {count} in {timer()-start_time}({path})")

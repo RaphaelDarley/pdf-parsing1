@@ -1,7 +1,9 @@
 import mysql.connector
 
-paper_table = "test_paper"
 image_table = "test_graph"
+paper_table = "test_paper"
+# image_table = "add_test_graph"
+# paper_table = "add_test_paper"
 
 
 def init():
